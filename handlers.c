@@ -1,85 +1,82 @@
 #include "main.h"
+
+ #include "holberton.h"
+#include <strings.h>
 /**
- *get_flags - acts responsively when a flag is invoked
- *@c:flag character
- *@f:struct flags pointer
- *Return:0 - flag invoked,1 otherwise
+ *put_string - prints a string
+ *@str:string to print
+ *Return:no. of characters printed
  */
-int get_flags(char c, han_s *f)
+int put_string(char *str)
 {
 	int i = 0;
 
-	switch (c)
+	for (i = 0; str[i]; i++)
 	{
-	case '+':
-		(*f).plus = 1;
-		i = 1;
-		break;
-	case ' ':
-		(*f).space = 1;
-		i = 1;
-		break;
-	case '#':
-		(*f).hash = 1;
-		i = 1;
-		break;
-	case '-':
-		(*f).minus = 1;
-		i = 1;
-		break;
-	case '0':
-		(*f).zero = 1;
-		i = 1;
-		break;
+		_putchar(str[i]);
 	}
 	return (i);
 }
 /**
- *get_modifier - finds the modifier and invokes corresponding func
- *@s:format string
+ *print_right - invokes right alignment with padding options
+ *@str:no. in a string or no. to print
  *@handler:handler struct
- *Return:1 if modifier is valid
+ *Return:no. of characters printed
  */
-int get_modifier(char *s, han_s *handler)
+int print_right(char *str, han_s *handler)/*prints in a normal alignment*/
 {
-	int i = 0;
+	unsigned int d = 0, neg, neg1;
+	unsigned int len = strlen(str);
 
-	switch (s)
+	char pad = ' ';
+
+/*number to be padded with zeroes left align not invoked*/
+/*to invoke zero leading fill*/
+	if (handler->zero && !handler->minus)
 	{
-	case 'h':
-		i = 1;
-		handler->h_mod = 1;
-		break;
-	case 'l':
-		i = 1;
-		handler->l_mod = 1;
-		break;
+		pad = '0';
 	}
-	return (i);
+/*checks whether number is unsigned*/
+	neg = (*str == '-');
+	neg1 = neg;
+/*unsigned and width specified and pad = '0'*/
+/*incrementing the str address*/
+	if (neg && len < handler->width && !handler->minus && pad == '0')
+		str++;
+	else
+		neg = 0;
+/*evaluates to invisible + or +*/
+	if ((handler->plus && !neg1) || (!handler->plus && handler->space && !neg1))
+		len++;
+	if (neg && pad == '0')/*print a negative sign*/
+		d += _putchar('-');
+	if (handler->plus && !neg1 && pad == '0')/*evaluates to '+'*/
+		d += _putchar('+');
+/*handling pad printing*/
+
+	for (len = len + 1; len < handler->width; )
+	{
+		d += _putchar(pad);
+	}
+	if (neg && pad == ' ')
+	{
+		d += _putchar('-');
+	}
+	if (handler->plus && !neg1 && pad == ' ')
+	{
+		d += _putchar('+');
+	}
+	else if (!handler->plus && handler->space && !neg1 && !handler->zero)
+		d += _putchar(' ');
+	d += put_string(str);
+	return (d);
 }
 /**
- *get_width - gets width from a width specifier
- *@s:format string
+ *print_left - prints a no. with left alignement invoked
+ *@str:number
  *@handler:struct
- *@list:list to increment
- *Return:string
+ *Return:no. of chars printed
  */
-char *get_width(char *s, han_s handler, va_list list)
+int print_left(char *str, han_s *handler)
 {
-	int width = 0;
-
-	if (*s == '*')
-	{
-		width = va_arg(list, int);
-		s++;
-	}
-	else
-	{
-		while (*s >= 0 && *s <= 9)
-		{
-			width = width * 10 + (*s++ - '0');
-		}
-	}
-	handler->width = width;
-	return (s);
-}
+	unsigned int d = 0;
